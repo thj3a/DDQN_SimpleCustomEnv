@@ -142,39 +142,43 @@ class DQN:
     def print_model(self):
         self.aux_model.summary()
 
-DDQN = DQN()
+def main():
+    DDQN = DQN()
 
-episodes = 1000
-rewards = []
-losses = []
-r = []
-inner_loss = []
-for ep in range(episodes):
-    state, done = DDQN.reset_env()
+    episodes = 1000
+    rewards = []
+    losses = []
     r = []
-    l = []
-    while not done:
-        action = DDQN.get_action(state)
-        next_state, done = DDQN.step(state, action)
-        reward = DDQN.calc_reward(state, next_state, done)
-        
-        DDQN.remember(state.copy(), action, reward, next_state.copy(), done)
-        # print("State: ", state, "Action: ", action, "Reward: ", reward, "Next State: ", next_state)
-        if len(DDQN.memory) > 100:  
-            loss = DDQN.replay() 
-        else:
-            loss = 0
+    inner_loss = []
+    for ep in range(episodes):
+        state, done = DDQN.reset_env()
+        r = []
+        l = []
+        while not done:
+            action = DDQN.get_action(state)
+            next_state, done = DDQN.step(state, action)
+            reward = DDQN.calc_reward(state, next_state, done)
+            
+            DDQN.remember(state.copy(), action, reward, next_state.copy(), done)
+            # print("State: ", state, "Action: ", action, "Reward: ", reward, "Next State: ", next_state)
+            if len(DDQN.memory) > 100:  
+                loss = DDQN.replay() 
+            else:
+                loss = 0
 
-        state = next_state
-        
-        l.append(loss)
-        r.append(reward)
+            state = next_state
+            
+            l.append(loss)
+            r.append(reward)
 
-    losses.append(np.mean(l))
-    rewards.append(np.sum(r))
-    if len(DDQN.memory) > 100:  DDQN.target_train()
-    # print(f"Episode:{ep}, Ep Reward: {rewards[-1]}, Last Loss: {losses[-1]}, Exploration: {DDQN.exploration_max}")
+        losses.append(np.mean(l))
+        rewards.append(np.sum(r))
+        if len(DDQN.memory) > 100:  DDQN.target_train()
+        # print(f"Episode:{ep}, Ep Reward: {rewards[-1]}, Last Loss: {losses[-1]}, Exploration: {DDQN.exploration_max}")
 
-plt.plot(rewards)
+    plt.plot(rewards)
 
-plt.plot(losses)
+    plt.plot(losses)
+
+if __name__ == "__main__":
+    main()

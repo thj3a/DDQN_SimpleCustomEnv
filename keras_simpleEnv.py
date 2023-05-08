@@ -9,7 +9,8 @@ import os
 import matplotlib.pyplot as plt
 
 # Gym imports
-from gym.spaces import Discrete, Box
+import gymnasium as gym
+from gymnasium.spaces import Discrete, Box
 
 # Keras imports
 import tensorflow as tf
@@ -20,9 +21,17 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.optimizers import Adam
 
 class DQN:
-    def __init__(self, memory_size=5*10**5, batch_size=32, gamma=0.99,
-        exploration_max=1.0, exploration_min=0.01, exploration_decay=0.999,
-        learning_rate=0.005, tau=0.125, n_actions=2, n_inputs=2):
+    def __init__(self, 
+                 memory_size=10_000, 
+                 batch_size=32, 
+                 gamma=0.99,
+                 exploration_max=1.0, 
+                 exploration_min=0.01, 
+                 exploration_decay=0.995,        
+                 learning_rate=0.005, 
+                 tau=0.125, 
+                 n_actions=2, 
+                 n_inputs=2):
         
         self.memory = deque(maxlen=memory_size)
         self.batch_size = batch_size
@@ -145,7 +154,7 @@ class DQN:
 def main():
     DDQN = DQN()
 
-    episodes = 1000
+    episodes = 500
     rewards = []
     losses = []
     r = []
@@ -173,12 +182,14 @@ def main():
 
         losses.append(np.mean(l))
         rewards.append(np.sum(r))
-        if len(DDQN.memory) > 100:  DDQN.target_train()
-        # print(f"Episode:{ep}, Ep Reward: {rewards[-1]}, Last Loss: {losses[-1]}, Exploration: {DDQN.exploration_max}")
+        if len(DDQN.memory) > 100  or ep % 10 == 0:  DDQN.target_train()
+        print(f"Episode:{ep}, Ep Reward: {rewards[-1]}, Last Loss: {losses[-1]}, Exploration: {DDQN.exploration_max}")
 
-    plt.plot(rewards)
-
-    plt.plot(losses)
+    plt.plot(rewards, label="rewards")
+    plt.plot(losses, label="losses")
+    plt.legend()
+    plt.title("Keras Results")
+    plt.savefig("keras-results.png")
 
 if __name__ == "__main__":
     main()
